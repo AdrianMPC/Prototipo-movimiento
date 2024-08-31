@@ -1,5 +1,7 @@
 extends CharacterBody3D
-
+# TODO -> Rehacer todo este codigo para que soporte acelaracion y desacelaracion (X)
+# TODO -> Anadir soporte para agacharse (X)
+# TODO -> Anadir eventos para trackear sonidos de pasos (X)
 
 const SPEED = 5.0
 const JUMP_VELOCITY = 4.5
