@@ -1,6 +1,7 @@
-[gd_scene load_steps=4 format=3 uid="uid://inkieu5uwp0x"]
+[gd_scene load_steps=5 format=3 uid="uid://inkieu5uwp0x"]
 
 [ext_resource type="Script" path="res://Scripts/Physics/player_component.gd" id="1_noey3"]
+[ext_resource type="Script" path="res://Scripts/Physics/player_stateMachine.gd" id="2_u253a"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_p4cfi"]
 
@@ -22,3 +23,6 @@ shape = SubResource("ConvexPolygonShape3D_b0d54")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.592049, 0)
 
 [node name="Camera3D" type="Camera3D" parent="NeckPivot"]
+
+[node name="PlayerState" type="Node3D" parent="."]
+script = ExtResource("2_u253a")

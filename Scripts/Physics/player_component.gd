@@ -3,6 +3,17 @@ extends CharacterBody3D
 # TODO -> Anadir soporte para agacharse (X)
 # TODO -> Anadir eventos para trackear sonidos de pasos (X)
 
+enum waterType {
+	STANDARD,
+	SNOW,
+	DEEP_SNOW
+}
+
+
+	
+var pc_waterType : waterType = waterType.STANDARD;
+var pc_waterLevel : int = 0;
+
 const SPEED = 5.0
 const JUMP_VELOCITY = 4.5
 const SENSITIVITY = 0.01
