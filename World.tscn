@@ -1,13 +1,14 @@
-[gd_scene load_steps=7 format=3 uid="uid://bqrr6v6dqg2w"]
+[gd_scene load_steps=10 format=3 uid="uid://bqrr6v6dqg2w"]
 
+[ext_resource type="Texture2D" uid="uid://dw5pnvt2mvaon" path="res://assets/hdris/kloofendal_48d_partly_cloudy_puresky_2k.hdr" id="1_2aun3"]
 [ext_resource type="PackedScene" uid="uid://inkieu5uwp0x" path="res://PlayerComponent.tscn" id="1_qaxgb"]
+[ext_resource type="Texture2D" uid="uid://d2mck8ctmpfnn" path="res://assets/textures/dev/grids/Dark/texture_07.png" id="2_vve4b"]
 
-[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_j4hbn"]
-sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
-ground_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_50r4k"]
+panorama = ExtResource("1_2aun3")
 
 [sub_resource type="Sky" id="Sky_o2n7w"]
-sky_material = SubResource("ProceduralSkyMaterial_j4hbn")
+sky_material = SubResource("PanoramaSkyMaterial_50r4k")
 
 [sub_resource type="Environment" id="Environment_57f5r"]
 background_mode = 2
@@ -15,7 +16,11 @@ sky = SubResource("Sky_o2n7w")
 tonemap_mode = 2
 glow_enabled = true
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pu5j0"]
+albedo_texture = ExtResource("2_vve4b")
+
 [sub_resource type="PlaneMesh" id="PlaneMesh_b3arq"]
+material = SubResource("StandardMaterial3D_pu5j0")
 size = Vector2(20, 20)
 
 [sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_hedwm"]
