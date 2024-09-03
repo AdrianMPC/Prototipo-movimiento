@@ -1,27 +1,42 @@
-[gd_scene load_steps=5 format=3 uid="uid://inkieu5uwp0x"]
+[gd_scene load_steps=7 format=3 uid="uid://inkieu5uwp0x"]
 
-[ext_resource type="Script" path="res://Scripts/Player/player_component_main.gd" id="1_jnc8s"]
-[ext_resource type="Script" path="res://Scripts/Player/player_movement_handler.gd" id="2_dbrna"]
+[ext_resource type="Script" path="res://PlayerInstanceGeneral.gd" id="1_856yl"]
+[ext_resource type="Script" path="res://Scripts/PlayerScript/p_movement_manager.gd" id="2_24w6v"]
 [ext_resource type="Script" path="res://Scripts/Player/player_camara_movement.gd" id="2_sm75g"]
+[ext_resource type="Script" path="res://Scripts/PlayerScript/c_headbob.gd" id="4_we0lm"]
 
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_sdlue"]
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_5qf8x"]
 
-[node name="playerController" type="CharacterBody3D" node_paths=PackedStringArray("movementManager")]
-script = ExtResource("1_jnc8s")
-movementManager = NodePath("MovementManager")
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_5qp06"]
 
-[node name="MovementManager" type="Node3D" parent="." node_paths=PackedStringArray("playerComponent", "NeckPivot")]
-script = ExtResource("2_dbrna")
-playerComponent = NodePath("..")
-NeckPivot = NodePath("../NeckPivot")
+[node name="playerController" type="CharacterBody3D" node_paths=PackedStringArray("_MovementManager")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -0.005)
+script = ExtResource("1_856yl")
+_MovementManager = NodePath("MovementManager")
+
+[node name="MovementManager" type="Node3D" parent="." node_paths=PackedStringArray("Controller_Instance", "HeadBobEffectNode")]
+script = ExtResource("2_24w6v")
+Controller_Instance = NodePath("..")
+HeadBobEffectNode = NodePath("../HeadPivot/HeadBob")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-shape = SubResource("CapsuleShape3D_sdlue")
+shape = SubResource("CapsuleShape3D_5qf8x")
 
-[node name="NeckPivot" type="Node3D" parent="." node_paths=PackedStringArray("PlayerController", "NeckPivot")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.613606, 0)
+[node name="WorldModel" type="Node3D" parent="."]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="WorldModel"]
+mesh = SubResource("CapsuleMesh_5qp06")
+
+[node name="HeadPivot" type="Node3D" parent="." node_paths=PackedStringArray("PlayerController", "NeckPivot")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.784212, 0)
 script = ExtResource("2_sm75g")
 PlayerController = NodePath("..")
 NeckPivot = NodePath(".")
 
-[node name="Camera3D" type="Camera3D" parent="NeckPivot"]
+[node name="HeadBob" type="Node3D" parent="HeadPivot" node_paths=PackedStringArray("HeadPivot", "Camera")]
+script = ExtResource("4_we0lm")
+HeadPivot = NodePath("..")
+Camera = NodePath("../Camera3D")
+
+[node name="Camera3D" type="Camera3D" parent="HeadPivot"]
+cull_mask = 1048573

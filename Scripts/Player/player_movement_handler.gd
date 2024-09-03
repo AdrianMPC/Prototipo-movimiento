@@ -1,7 +1,11 @@
 extends Node
-class_name MovementManager
+#class_name MovementManager
 @export var playerComponent: CharacterBody3D;
 @export var NeckPivot: Node3D;
+
+@export_category("Collisions")
+@export var StandingCollision: CollisionShape3D;
+@export var CrouchingCollision: CollisionShape3D;
 
 var currentSpeed: float = 5.0;
 @export var jumpVelocity: float = 4.0;
@@ -20,6 +24,7 @@ var currentSpeed: float = 5.0;
 @export var defaultDepth: float = 0.614;
 
 var _direction = Vector3.ZERO;
+
 
 func pm_moveHandler(delta: float):
 	
@@ -45,7 +50,10 @@ func pm_moveHandler(delta: float):
 		playerComponent.velocity.x = move_toward(playerComponent.velocity.x, 0, currentSpeed)
 		playerComponent.velocity.z = move_toward(playerComponent.velocity.z, 0, currentSpeed)
 		
-
+"""
+_pm_playerStateHandler -> void
+maneja todas las transformaciones necesarias para agacharse
+"""
 func _pm_playerStateHandler(delta: float) -> void:
 	var targetSpeed: float;
 	if _pm_isCrouch():
@@ -66,8 +74,12 @@ func _pm_playerStateHandler(delta: float) -> void:
 func _pm_crouchHandler(cur: bool) -> void:
 	if cur:
 		NeckPivot.position.y = defaultDepth + crouchDepth;
+		StandingCollision.disabled = true;
+		CrouchingCollision.disabled = false;
 	else:
 		NeckPivot.position.y = defaultDepth;
+		StandingCollision.disabled = false
+		CrouchingCollision.disabled = true;
 
 func _pm_canJump() -> bool:
 	if Input.is_action_just_pressed("jump") and playerComponent.is_on_floor():
