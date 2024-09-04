@@ -4,7 +4,7 @@ class_name CHeadBobEffect
 @export var Camera: Camera3D;
 
 const HEADBOB_FRECUENCY: float = 0.06
-const HEADBOB_MOVE_AMOUNT: float = 2.4;
+const HEADBOB_MOVE_AMOUNT: float = 2.4
 
 var headbob_time := 0.0
 

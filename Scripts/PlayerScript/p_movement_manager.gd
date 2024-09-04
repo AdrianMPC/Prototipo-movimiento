@@ -12,6 +12,11 @@ var gravity = ProjectSettings.get_setting("physics/3d/default_gravity");
 @export var walk_speed: float = 7.0;
 @export var sprint_speed: float = 8.5;
 
+@export_category("Air")
+@export var air_cap: float = 0.85;
+@export var air_acceñ = 800.0;
+@export var air_move_speed = 500.0;
+
 var wish_dir: Vector3 = Vector3.ZERO;
 
 var headbob_time: float = 0.0;
