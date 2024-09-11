@@ -11,13 +11,20 @@
 
 [node name="playerController" type="CharacterBody3D" node_paths=PackedStringArray("_MovementManager")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -0.005)
+floor_max_angle = 0.139626
 script = ExtResource("1_856yl")
 _MovementManager = NodePath("MovementManager")
 
-[node name="MovementManager" type="Node3D" parent="." node_paths=PackedStringArray("Controller_Instance", "HeadBobEffectNode")]
+[node name="MovementManager" type="Node3D" parent="." node_paths=PackedStringArray("Controller_Instance", "NeckPivot", "HeadBobEffectNode", "PlayerCollision", "StairsBelowRayCast3D", "StairsAheadRayCast3D")]
 script = ExtResource("2_24w6v")
+AUTO_BHOP = true
 Controller_Instance = NodePath("..")
+NeckPivot = NodePath("../HeadPivot")
 HeadBobEffectNode = NodePath("../HeadPivot/HeadBob")
+PlayerCollision = NodePath("../CollisionShape3D")
+jump_velocity = 5.0
+StairsBelowRayCast3D = NodePath("../StairsBellowRC3D")
+StairsAheadRayCast3D = NodePath("../StairsAheadRC3D")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("CapsuleShape3D_5qf8x")
@@ -28,15 +35,28 @@ shape = SubResource("CapsuleShape3D_5qf8x")
 mesh = SubResource("CapsuleMesh_5qp06")
 
 [node name="HeadPivot" type="Node3D" parent="." node_paths=PackedStringArray("PlayerController", "NeckPivot")]
+unique_name_in_owner = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.784212, 0)
 script = ExtResource("2_sm75g")
 PlayerController = NodePath("..")
 NeckPivot = NodePath(".")
 
 [node name="HeadBob" type="Node3D" parent="HeadPivot" node_paths=PackedStringArray("HeadPivot", "Camera")]
+unique_name_in_owner = true
 script = ExtResource("4_we0lm")
 HeadPivot = NodePath("..")
 Camera = NodePath("../Camera3D")
 
 [node name="Camera3D" type="Camera3D" parent="HeadPivot"]
+unique_name_in_owner = true
 cull_mask = 1048573
+
+[node name="StairsAheadRC3D" type="RayCast3D" parent="."]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.455563, -0.845548)
+target_position = Vector3(0, -0.6, 0)
+
+[node name="StairsBellowRC3D" type="RayCast3D" parent="."]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.938993, 0)
+target_position = Vector3(0, -0.75, 0)
