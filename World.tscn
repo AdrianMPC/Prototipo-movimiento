@@ -1,10 +1,10 @@
-[gd_scene load_steps=15 format=3 uid="uid://bqrr6v6dqg2w"]
+[gd_scene load_steps=17 format=3 uid="uid://bqrr6v6dqg2w"]
 
 [ext_resource type="Texture2D" uid="uid://dw5pnvt2mvaon" path="res://assets/hdris/kloofendal_48d_partly_cloudy_puresky_2k.hdr" id="1_2aun3"]
 [ext_resource type="PackedScene" uid="uid://inkieu5uwp0x" path="res://PlayerComponent.tscn" id="1_qaxgb"]
 [ext_resource type="Texture2D" uid="uid://d2mck8ctmpfnn" path="res://assets/textures/dev/grids/Dark/texture_07.png" id="2_vve4b"]
 [ext_resource type="Texture2D" uid="uid://dfcvpyi6o50cu" path="res://assets/textures/dev/grids/Orange/texture_05.png" id="4_25aek"]
-[ext_resource type="PackedScene" path="res://assets/world/CSGStairMaker3D.tscn" id="5_swcr2"]
+[ext_resource type="PackedScene" uid="uid://bak8ltrhbmlv5" path="res://assets/world/CSGStairMaker3D.tscn" id="5_swcr2"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_50r4k"]
 panorama = ExtResource("1_2aun3")
@@ -36,6 +36,11 @@ albedo_texture = ExtResource("4_25aek")
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_e1u2t"]
 points = PackedVector3Array(-0.5, -0.5, -0.5, 0.5, 0.5, 0.5, 0.5, -0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, -0.5, -0.5, -0.5, -0.5, 0.5, -0.5, 0.5, -0.5)
 
+[sub_resource type="BoxMesh" id="BoxMesh_jfug0"]
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_rd6cv"]
+points = PackedVector3Array(-0.5, -0.5, -0.5, 0.5, 0.5, 0.5, 0.5, -0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, -0.5, -0.5, -0.5, -0.5, 0.5, -0.5, 0.5, -0.5)
+
 [node name="Node3D" type="Node3D"]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
@@ -55,7 +60,8 @@ mesh = SubResource("PlaneMesh_b3arq")
 shape = SubResource("ConcavePolygonShape3D_hedwm")
 
 [node name="CharacterBody3D" parent="." instance=ExtResource("1_qaxgb")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.58723, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.23836, 0)
+floor_max_angle = 0.785398
 
 [node name="surf" type="MeshInstance3D" parent="."]
 transform = Transform3D(-9.9177e-07, -53.8787, 1.69623, 0, 86.224, 1.05992, -22.689, 2.35511e-06, -7.41444e-08, -3.06083, 0.541048, -32.4876)
@@ -68,46 +74,35 @@ surface_material_override/0 = SubResource("StandardMaterial3D_qggaq")
 shape = SubResource("ConvexPolygonShape3D_e1u2t")
 
 [node name="CSGStairMaker3D" parent="." instance=ExtResource("5_swcr2")]
-transform = Transform3D(-4.20149e-09, 0, 1, 0, 1, 0, -0.096119, 0, -4.37114e-08, -19.4814, 15.1818, 0.0922756)
+transform = Transform3D(-4.37114e-08, 0, 2.65033, 0, 1, 0, -1, 0, -1.1585e-07, -10.4955, 0.490372, 16.3055)
 use_collision = true
-size = Vector3(443.733, 30.6948, 4.16156)
-
-[node name="CSGStairMaker3D3" parent="." instance=ExtResource("5_swcr2")]
-transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -14.935, 1.42788, 16.3504)
-use_collision = true
-size = Vector3(2.35541, 1, 5.23633)
-
-[node name="CSGStairMaker3D4" parent="." instance=ExtResource("5_swcr2")]
-transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -14.935, 2.40332, 14.0116)
-use_collision = true
-size = Vector3(2.35541, 1, 5.23633)
-
-[node name="CSGStairMaker3D5" parent="." instance=ExtResource("5_swcr2")]
-transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -14.935, 3.3925, 11.6619)
-use_collision = true
-size = Vector3(2.35541, 1, 5.23633)
-
-[node name="CSGStairMaker3D6" parent="." instance=ExtResource("5_swcr2")]
-transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -14.935, 4.37855, 9.30777)
-use_collision = true
-size = Vector3(2.35541, 1, 5.23633)
-
-[node name="CSGStairMaker3D7" parent="." instance=ExtResource("5_swcr2")]
-transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -14.9337, 5.3659, 6.95271)
-use_collision = true
-size = Vector3(2.35541, 1, 5.23633)
-
-[node name="CSGStairMaker3D8" parent="." instance=ExtResource("5_swcr2")]
-transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -14.935, 1.42788, 16.3504)
-use_collision = true
-size = Vector3(2.35541, 1, 5.23633)
-
-[node name="CSGStairMaker3D9" parent="." instance=ExtResource("5_swcr2")]
-transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -14.9287, 0.440535, 18.6608)
-use_collision = true
-size = Vector3(2.35541, 1, 5.23633)
+size = Vector3(1.44714, 1, 3.07178)
 
 [node name="CSGStairMaker3D2" parent="." instance=ExtResource("5_swcr2")]
-transform = Transform3D(-4.20149e-09, 0, 1, 0, 1, 0, -0.096119, 0, -4.37114e-08, -10.2789, 15.244, -1.814)
+transform = Transform3D(-4.37114e-08, 0, 2.65033, 0, 1, 0, -1, 0, -1.1585e-07, -10.4955, 1.48406, 14.8589)
 use_collision = true
-size = Vector3(404.439, 30.6948, 4.16156)
+size = Vector3(1.44714, 1, 3.07178)
+
+[node name="CSGStairMaker3D3" parent="." instance=ExtResource("5_swcr2")]
+transform = Transform3D(-4.37114e-08, 0, 2.65033, 0, 1, 0, -1, 0, -1.1585e-07, -10.4955, 2.48042, 13.4131)
+use_collision = true
+size = Vector3(1.44714, 1, 3.07178)
+
+[node name="CSGStairMaker3D4" parent="." instance=ExtResource("5_swcr2")]
+transform = Transform3D(-4.37114e-08, 0, 2.65033, 0, 1, 0, -1, 0, -1.1585e-07, -10.4955, 3.47687, 11.9664)
+use_collision = true
+size = Vector3(1.44714, 1, 3.07178)
+
+[node name="CSGStairMaker3D5" parent="." instance=ExtResource("5_swcr2")]
+transform = Transform3D(-4.37114e-08, 0, 2.65033, 0, 1, 0, -1, 0, -1.1585e-07, -10.4955, 4.47518, 10.5182)
+use_collision = true
+size = Vector3(1.44714, 1, 3.07178)
+
+[node name="Block" type="MeshInstance3D" parent="."]
+transform = Transform3D(8.16316, 0, 0, 0, 5.99925, 0, 0, 0, 9.7934, -10.5005, 1.96917, 4.90144)
+mesh = SubResource("BoxMesh_jfug0")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Block"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Block/StaticBody3D"]
+shape = SubResource("ConvexPolygonShape3D_rd6cv")

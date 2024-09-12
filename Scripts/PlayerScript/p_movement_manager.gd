@@ -42,19 +42,24 @@ var cam_aligned_wish_dir = Vector3.ZERO;
 
 var headbob_time: float = 0.0;
 
-func _main_movement_process(delta: float, last_frame_floor: float) -> void:
-	_last_frame_was_onfloor = last_frame_floor;
+func _main_movement_process(delta: float) -> void:
+	if Controller_Instance.is_on_floor(): 
+		_last_frame_was_onfloor = Engine.get_physics_frames()
 	var input_dir = Input.get_vector("left", "right", "forward", "backwards").normalized();
 	wish_dir = Controller_Instance.global_transform.basis * Vector3(input_dir.x ,0, input_dir.y);
 	cam_aligned_wish_dir = NeckPivot.global_transform.basis * Vector3(input_dir.x ,0, input_dir.y);
-	
+
 	if not handle_noclip(delta):
-		if Controller_Instance.is_on_floor():
+		if Controller_Instance.is_on_floor() or _snapped_to_stairs_last_frame:
 			if Input.is_action_just_pressed("jump") or (AUTO_BHOP and Input.is_action_pressed("jump")):
 				Controller_Instance.velocity.y = jump_velocity;
 			_handle_ground_physics(delta);
 		else:
 			_handle_air_physics(delta);
+			
+		if not _snap_up_to_stairs_check(delta):
+			Controller_Instance.move_and_slide()
+			_snap_down_to_stairs_check()
 		
 	
 func _send_bob_effect(delta) -> void:
@@ -115,20 +120,45 @@ func _handle_water_physics(delta) -> void:
 	pass
 
 func _snap_down_to_stairs_check() -> void:
-	var did_snap : bool = false;
-	var was_on_floor_last_frame: bool = Engine.get_physics_frames() == _last_frame_was_onfloor;
-	var floor_below : bool = StairsBelowRayCast3D.is_colliding() and not _is_surface_too_steep(StairsBelowRayCast3D.get_collision_normal());
+	var did_snap: bool = false;
+	StairsBelowRayCast3D.force_raycast_update();
+	var floor_below : bool = StairsBelowRayCast3D.is_colliding() and not _is_surface_too_steep(StairsBelowRayCast3D.get_collision_normal())
+	var was_on_floor_last_frame = Engine.get_physics_frames() == _last_frame_was_onfloor;
 	if not Controller_Instance.is_on_floor() and Controller_Instance.velocity.y <= 0 and (was_on_floor_last_frame or _snapped_to_stairs_last_frame) and floor_below:
 		var body_test_result = KinematicCollision3D.new();
 		if Controller_Instance.test_move(Controller_Instance.global_transform, Vector3(0,-MAX_STEP_HEIGHT,0), body_test_result):
-			print("Will snap")
-			var translate_y = body_test_result.get_travel().y
-			Controller_Instance.position.y += translate_y
-			Controller_Instance.apply_floor_snap()
-			did_snap = true
-		_snapped_to_stairs_last_frame = did_snap;
-		
+			var translate_y = body_test_result.get_travel().y;
+			Controller_Instance.position.y += translate_y;
+			Controller_Instance.apply_floor_snap();
+			did_snap = true;
+	_snapped_to_stairs_last_frame = did_snap;
 
+func _snap_up_to_stairs_check(delta: float) -> bool:
+	if not Controller_Instance.is_on_floor() and not _snapped_to_stairs_last_frame: 
+		return false;
+		
+	if Controller_Instance.velocity.y > 0 or (Controller_Instance.velocity * Vector3(1,0,1)).length() == 0: 
+		return false;
+		
+	var expected_move_motion = Controller_Instance.velocity * Vector3(1,0,1) * delta;
+	var step_pos_with_clearance = Controller_Instance.global_transform.translated(expected_move_motion + Vector3(0, MAX_STEP_HEIGHT * 2, 0));
+	
+	var down_check_result = KinematicCollision3D.new();
+	if (Controller_Instance.test_move(step_pos_with_clearance, Vector3(0,-MAX_STEP_HEIGHT*2,0), down_check_result)
+	and (down_check_result.get_collider().is_class("StaticBody3D") or down_check_result.get_collider().is_class("CSGShape3D"))):
+		var step_height = ((step_pos_with_clearance.origin + down_check_result.get_travel()) - self.global_position).y;
+		if step_height > MAX_STEP_HEIGHT or step_height <= 0.01 or (down_check_result.get_position() - self.global_position).y > MAX_STEP_HEIGHT: 
+			return false;
+			
+		StairsAheadRayCast3D.global_position = down_check_result.get_position() + Vector3(0,MAX_STEP_HEIGHT,0) + expected_move_motion.normalized() * 0.1;
+		StairsAheadRayCast3D.force_raycast_update();
+		if StairsAheadRayCast3D.is_colliding() and not _is_surface_too_steep(StairsAheadRayCast3D.get_collision_normal()):
+			Controller_Instance.global_position = step_pos_with_clearance.origin + down_check_result.get_travel();
+			Controller_Instance.apply_floor_snap();
+			_snapped_to_stairs_last_frame = true;
+			return true;
+	return false;
+	
 func handle_noclip(delta) -> bool:
 	var _speed = 2.0;
 	if Input.is_action_just_pressed("noclip") and OS.has_feature("debug"):
@@ -152,17 +182,3 @@ func _get_move_speed() -> float:
 	
 func _is_surface_too_steep(normal: Vector3):
 		return normal.angle_to(Vector3.UP) > Controller_Instance.floor_max_angle;
-		
-func _run_body_test_motion(from: Transform3D, motion: Vector3, result = null) -> bool:
-	if not result:
-		result = PhysicsTestMotionParameters3D.new();
-	var params = PhysicsTestMotionParameters3D.new();
-	params.from = from;
-	params.motion = motion;
-	
-	return PhysicsServer3D.body_test_motion(Controller_Instance.get_rid(), params, result);
-		
-
-# Called when the node enters the scene tree for the first time.
-func _ready() -> void:
-	pass # Replace with function body.

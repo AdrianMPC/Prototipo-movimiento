@@ -9,21 +9,22 @@
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_5qp06"]
 
-[node name="playerController" type="CharacterBody3D" node_paths=PackedStringArray("_MovementManager")]
+[node name="playerController" type="CharacterBody3D" node_paths=PackedStringArray("MovementManager", "WorldModel")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -0.005)
 floor_max_angle = 0.139626
 script = ExtResource("1_856yl")
-_MovementManager = NodePath("MovementManager")
+MovementManager = NodePath("MovementManager")
+WorldModel = NodePath("WorldModel")
 
 [node name="MovementManager" type="Node3D" parent="." node_paths=PackedStringArray("Controller_Instance", "NeckPivot", "HeadBobEffectNode", "PlayerCollision", "StairsBelowRayCast3D", "StairsAheadRayCast3D")]
 script = ExtResource("2_24w6v")
-AUTO_BHOP = true
+SURF = false
 Controller_Instance = NodePath("..")
 NeckPivot = NodePath("../HeadPivot")
 HeadBobEffectNode = NodePath("../HeadPivot/HeadBob")
 PlayerCollision = NodePath("../CollisionShape3D")
 jump_velocity = 5.0
-StairsBelowRayCast3D = NodePath("../StairsBellowRC3D")
+StairsBelowRayCast3D = NodePath("../StairsBelowRC3D")
 StairsAheadRayCast3D = NodePath("../StairsAheadRC3D")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
@@ -53,10 +54,10 @@ cull_mask = 1048573
 
 [node name="StairsAheadRC3D" type="RayCast3D" parent="."]
 unique_name_in_owner = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.455563, -0.845548)
-target_position = Vector3(0, -0.6, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.119519, -0.478861, -0.712837)
+target_position = Vector3(0, -0.55, 0)
 
-[node name="StairsBellowRC3D" type="RayCast3D" parent="."]
+[node name="StairsBelowRC3D" type="RayCast3D" parent="."]
 unique_name_in_owner = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.938993, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
 target_position = Vector3(0, -0.75, 0)
