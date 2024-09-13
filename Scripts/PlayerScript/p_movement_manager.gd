@@ -33,6 +33,9 @@ var gravity = ProjectSettings.get_setting("physics/3d/default_gravity");
 @export var StairsAheadRayCast3D: RayCast3D;
 @export var MAX_STEP_HEIGHT: float = 0.5;
 
+@export_category("Camera related")
+@export var CameraSmoothingModule: CPlayerCameraSmoothing;
+
 var _snapped_to_stairs_last_frame: bool = false;
 var _last_frame_was_onfloor: float = -INF;
 
@@ -61,7 +64,8 @@ func _main_movement_process(delta: float) -> void:
 			Controller_Instance.move_and_slide()
 			_snap_down_to_stairs_check()
 		
-	
+	CameraSmoothingModule._slide_camera_smooth_back_to_origin(delta, walk_speed);
+
 func _send_bob_effect(delta) -> void:
 	headbob_time += delta * Controller_Instance.velocity.length();
 	HeadBobEffectNode.headbobProcess(headbob_time);
@@ -122,11 +126,12 @@ func _handle_water_physics(delta) -> void:
 func _snap_down_to_stairs_check() -> void:
 	var did_snap: bool = false;
 	StairsBelowRayCast3D.force_raycast_update();
-	var floor_below : bool = StairsBelowRayCast3D.is_colliding() and not _is_surface_too_steep(StairsBelowRayCast3D.get_collision_normal())
+	var floor_below : bool = StairsBelowRayCast3D.is_colliding() and not _is_surface_too_steep(StairsBelowRayCast3D.get_collision_normal());
 	var was_on_floor_last_frame = Engine.get_physics_frames() == _last_frame_was_onfloor;
 	if not Controller_Instance.is_on_floor() and Controller_Instance.velocity.y <= 0 and (was_on_floor_last_frame or _snapped_to_stairs_last_frame) and floor_below:
 		var body_test_result = KinematicCollision3D.new();
 		if Controller_Instance.test_move(Controller_Instance.global_transform, Vector3(0,-MAX_STEP_HEIGHT,0), body_test_result):
+			CameraSmoothingModule._save_camera_pos_for_smoothing();
 			var translate_y = body_test_result.get_travel().y;
 			Controller_Instance.position.y += translate_y;
 			Controller_Instance.apply_floor_snap();
@@ -153,6 +158,7 @@ func _snap_up_to_stairs_check(delta: float) -> bool:
 		StairsAheadRayCast3D.global_position = down_check_result.get_position() + Vector3(0,MAX_STEP_HEIGHT,0) + expected_move_motion.normalized() * 0.1;
 		StairsAheadRayCast3D.force_raycast_update();
 		if StairsAheadRayCast3D.is_colliding() and not _is_surface_too_steep(StairsAheadRayCast3D.get_collision_normal()):
+			CameraSmoothingModule._save_camera_pos_for_smoothing();
 			Controller_Instance.global_position = step_pos_with_clearance.origin + down_check_result.get_travel();
 			Controller_Instance.apply_floor_snap();
 			_snapped_to_stairs_last_frame = true;

@@ -3,9 +3,10 @@ extends Node
 @export_category("Instances")
 @export var PlayerController: CharacterBody3D;
 @export var NeckPivot: Node3D;
+@export var PlayerCamera: Node3D;
 
 @export_category("Sensitivity configurations")
-@export var currentSensivity: float = 0.1;
+@export var currentSensivity: float = 0.005;
 @export var currentControllerSensivity: float = 0.05;
 
 @export_category("Clamp value")
@@ -18,11 +19,18 @@ var cur_controller_look: Vector2 = Vector2()
 func _ready() -> void:
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED);
 
-func _input(event) -> void:
-	if event is InputEventMouseMotion:
-		PlayerController.rotate_y(deg_to_rad(-event.relative.x * currentSensivity));
-		NeckPivot.rotate_x(deg_to_rad(-event.relative.y * currentSensivity));
-		NeckPivot.rotation.x = clamp(NeckPivot.rotation.x, minValue, maxValue);
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	elif event.is_action_pressed("ui_cancel"):
+		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+		
+	if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
+		if event is InputEventMouseMotion:
+			PlayerController.rotate_y(-event.relative.x * currentSensivity);
+			PlayerCamera.rotate_x(-event.relative.y * currentSensivity);
+			var rotation = PlayerCamera.rotation.x;
+			PlayerCamera.rotation.x = clamp(rotation, minValue, maxValue);
 		
 
 func _handle_controller_input(delta) -> void:

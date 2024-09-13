@@ -1,9 +1,10 @@
-[gd_scene load_steps=7 format=3 uid="uid://inkieu5uwp0x"]
+[gd_scene load_steps=8 format=3 uid="uid://inkieu5uwp0x"]
 
 [ext_resource type="Script" path="res://PlayerInstanceGeneral.gd" id="1_856yl"]
 [ext_resource type="Script" path="res://Scripts/PlayerScript/p_movement_manager.gd" id="2_24w6v"]
 [ext_resource type="Script" path="res://Scripts/Player/player_camara_movement.gd" id="2_sm75g"]
 [ext_resource type="Script" path="res://Scripts/PlayerScript/c_headbob.gd" id="4_we0lm"]
+[ext_resource type="Script" path="res://Scripts/Player/player_camera_smoothing.gd" id="5_3c4ra"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_5qf8x"]
 
@@ -16,7 +17,7 @@ script = ExtResource("1_856yl")
 MovementManager = NodePath("MovementManager")
 WorldModel = NodePath("WorldModel")
 
-[node name="MovementManager" type="Node3D" parent="." node_paths=PackedStringArray("Controller_Instance", "NeckPivot", "HeadBobEffectNode", "PlayerCollision", "StairsBelowRayCast3D", "StairsAheadRayCast3D")]
+[node name="MovementManager" type="Node3D" parent="." node_paths=PackedStringArray("Controller_Instance", "NeckPivot", "HeadBobEffectNode", "PlayerCollision", "StairsBelowRayCast3D", "StairsAheadRayCast3D", "CameraSmoothingModule")]
 script = ExtResource("2_24w6v")
 SURF = false
 Controller_Instance = NodePath("..")
@@ -26,6 +27,7 @@ PlayerCollision = NodePath("../CollisionShape3D")
 jump_velocity = 5.0
 StairsBelowRayCast3D = NodePath("../StairsBelowRC3D")
 StairsAheadRayCast3D = NodePath("../StairsAheadRC3D")
+CameraSmoothingModule = NodePath("../HeadPivot/CameraSmoothNode")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("CapsuleShape3D_5qf8x")
@@ -35,20 +37,27 @@ shape = SubResource("CapsuleShape3D_5qf8x")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="WorldModel"]
 mesh = SubResource("CapsuleMesh_5qp06")
 
-[node name="HeadPivot" type="Node3D" parent="." node_paths=PackedStringArray("PlayerController", "NeckPivot")]
+[node name="HeadPivot" type="Node3D" parent="." node_paths=PackedStringArray("PlayerController", "NeckPivot", "PlayerCamera")]
 unique_name_in_owner = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.784212, 0)
 script = ExtResource("2_sm75g")
 PlayerController = NodePath("..")
 NeckPivot = NodePath(".")
+PlayerCamera = NodePath("CameraSmoothNode/Camera3D")
 
 [node name="HeadBob" type="Node3D" parent="HeadPivot" node_paths=PackedStringArray("HeadPivot", "Camera")]
 unique_name_in_owner = true
 script = ExtResource("4_we0lm")
 HeadPivot = NodePath("..")
-Camera = NodePath("../Camera3D")
+Camera = NodePath("../CameraSmoothNode/Camera3D")
 
-[node name="Camera3D" type="Camera3D" parent="HeadPivot"]
+[node name="CameraSmoothNode" type="Node3D" parent="HeadPivot" node_paths=PackedStringArray("SmoothCamera", "ControllerInstance")]
+unique_name_in_owner = true
+script = ExtResource("5_3c4ra")
+SmoothCamera = NodePath(".")
+ControllerInstance = NodePath("../..")
+
+[node name="Camera3D" type="Camera3D" parent="HeadPivot/CameraSmoothNode"]
 unique_name_in_owner = true
 cull_mask = 1048573
 
