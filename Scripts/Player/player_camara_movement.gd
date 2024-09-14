@@ -3,7 +3,7 @@ extends Node
 @export_category("Instances")
 @export var PlayerController: CharacterBody3D;
 @export var NeckPivot: Node3D;
-@export var PlayerCamera: Node3D;
+@export var PlayerCamera: Camera3D;
 
 @export_category("Sensitivity configurations")
 @export var currentSensivity: float = 0.005;

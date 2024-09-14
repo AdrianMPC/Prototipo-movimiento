@@ -78,3 +78,7 @@ noclip={
 [physics]
 
 3d/default_gravity=10.0
+
+[rendering]
+
+2d/default_gravity=10.0

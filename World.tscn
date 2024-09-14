@@ -1,10 +1,11 @@
-[gd_scene load_steps=22 format=3 uid="uid://bqrr6v6dqg2w"]
+[gd_scene load_steps=29 format=3 uid="uid://bqrr6v6dqg2w"]
 
 [ext_resource type="Texture2D" uid="uid://dw5pnvt2mvaon" path="res://assets/hdris/kloofendal_48d_partly_cloudy_puresky_2k.hdr" id="1_2aun3"]
 [ext_resource type="PackedScene" uid="uid://inkieu5uwp0x" path="res://PlayerComponent.tscn" id="1_qaxgb"]
 [ext_resource type="Texture2D" uid="uid://d2mck8ctmpfnn" path="res://assets/textures/dev/grids/Dark/texture_07.png" id="2_vve4b"]
 [ext_resource type="Texture2D" uid="uid://dfcvpyi6o50cu" path="res://assets/textures/dev/grids/Orange/texture_05.png" id="4_25aek"]
 [ext_resource type="PackedScene" uid="uid://bak8ltrhbmlv5" path="res://assets/world/CSGStairMaker3D.tscn" id="5_swcr2"]
+[ext_resource type="PackedScene" uid="uid://ca0wevg1lb4rx" path="res://utils/WaterMaker3D/WaterMaker3D.tscn" id="6_4l2c3"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_50r4k"]
 panorama = ExtResource("1_2aun3")
@@ -17,6 +18,8 @@ background_mode = 2
 sky = SubResource("Sky_o2n7w")
 tonemap_mode = 2
 glow_enabled = true
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.0
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pu5j0"]
 albedo_texture = ExtResource("2_vve4b")
@@ -56,6 +59,42 @@ material = SubResource("StandardMaterial3D_42j3y")
 
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_kdh8j"]
 points = PackedVector3Array(-0.5, -0.5, -0.5, 0.5, 0.5, 0.5, 0.5, -0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, -0.5, -0.5, -0.5, -0.5, 0.5, -0.5, 0.5, -0.5)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1a5ra"]
+albedo_texture = ExtResource("4_25aek")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_y0oye"]
+albedo_texture = ExtResource("2_vve4b")
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_gn0e2"]
+resource_local_to_scene = true
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_wgvoa"]
+resource_local_to_scene = true
+seamless = true
+as_normal_map = true
+noise = SubResource("FastNoiseLite_gn0e2")
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_6w4oq"]
+resource_local_to_scene = true
+seamless = true
+as_normal_map = true
+noise = SubResource("FastNoiseLite_gn0e2")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_3wmtn"]
+resource_local_to_scene = true
+transparency = 1
+cull_mode = 2
+depth_draw_mode = 1
+albedo_color = Color(0.309804, 0.541176, 0.866667, 0.388235)
+roughness = 0.0
+normal_enabled = true
+normal_texture = SubResource("NoiseTexture2D_wgvoa")
+refraction_enabled = true
+refraction_texture = SubResource("NoiseTexture2D_6w4oq")
+uv1_scale = Vector3(0.06, 0.06, 0.06)
+uv1_triplanar = true
+uv1_world_triplanar = true
 
 [node name="Node3D" type="Node3D"]
 
@@ -138,7 +177,7 @@ mesh = SubResource("BoxMesh_jfug0")
 shape = SubResource("ConvexPolygonShape3D_rd6cv")
 
 [node name="Block3" type="MeshInstance3D" parent="."]
-transform = Transform3D(1.986, 0, 0, 0, 0.49, 0, 0, 0, 1.205, -10.5005, 6.8489, 4.90144)
+transform = Transform3D(1.86639, 0, 0, 0, 0.49, 0, 0, 0, 1.205, -10.4665, 6.84223, 4.85236)
 mesh = SubResource("BoxMesh_jfug0")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Block3"]
@@ -181,3 +220,26 @@ mesh = SubResource("BoxMesh_jaor7")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Box3/StaticBody3D"]
 shape = SubResource("ConvexPolygonShape3D_kdh8j")
+
+[node name="Pool" type="CSGCombiner3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.6642, 0, -6.31941)
+use_collision = true
+
+[node name="CSGBox3D" type="CSGBox3D" parent="Pool"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.174072, 2.98138, 2.87067)
+size = Vector3(8.05713, 6.10022, 6.74133)
+material = SubResource("StandardMaterial3D_1a5ra")
+
+[node name="CSGBox3D2" type="CSGBox3D" parent="Pool/CSGBox3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.265913, 0.293351, -0.325264)
+operation = 2
+size = Vector3(6.96894, 5.64487, 5.80391)
+material = SubResource("StandardMaterial3D_y0oye")
+
+[node name="WaterMaker3D" parent="." instance=ExtResource("6_4l2c3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.6958, 3.14432, -3.63577)
+size = Vector3(7.31055, 5.66211, 6.21851)
+material = SubResource("StandardMaterial3D_3wmtn")
+water_texture_uv_scale = 0.06
+fog_color = Color(0.309804, 0.541176, 0.866667, 0.388235)
+fog_fade_dist = 1.0

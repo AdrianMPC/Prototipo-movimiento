@@ -17,14 +17,15 @@ script = ExtResource("1_856yl")
 MovementManager = NodePath("MovementManager")
 WorldModel = NodePath("WorldModel")
 
-[node name="MovementManager" type="Node3D" parent="." node_paths=PackedStringArray("Controller_Instance", "NeckPivot", "HeadBobEffectNode", "PlayerCollision", "PlayerMesh", "StairsBelowRayCast3D", "StairsAheadRayCast3D", "CameraSmoothingModule", "MoveableHeadModule")]
+[node name="MovementManager" type="Node3D" parent="." node_paths=PackedStringArray("Controller_Instance", "PlayerCamera", "HeadBobEffectNode", "PlayerCollision", "PlayerMesh", "StairsBelowRayCast3D", "StairsAheadRayCast3D", "CameraSmoothingModule", "MoveableHeadModule")]
 script = ExtResource("2_24w6v")
 SURF = false
 Controller_Instance = NodePath("..")
-NeckPivot = NodePath("../HeadPivotOGPos")
+PlayerCamera = NodePath("../HeadPivotOGPos/HeadPivot/CameraSmoothNode/Camera3D")
 HeadBobEffectNode = NodePath("../HeadPivotOGPos/HeadBob")
 PlayerCollision = NodePath("../CollisionShape3D")
 PlayerMesh = NodePath("../WorldModel/PlayerMesh")
+jump_velocity = 5.0
 sprint_speed = 9.0
 StairsBelowRayCast3D = NodePath("../StairsBelowRC3D")
 StairsAheadRayCast3D = NodePath("../StairsAheadRC3D")

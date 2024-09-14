@@ -10,7 +10,7 @@ var gravity = ProjectSettings.get_setting("physics/3d/default_gravity");
 
 @export_category("Controller instances")
 @export var Controller_Instance: CharacterBody3D;
-@export var NeckPivot: Node3D;
+@export var PlayerCamera: Camera3D;
 @export var HeadBobEffectNode: CHeadBobEffect;
 @export var PlayerCollision: CollisionShape3D;
 @export var PlayerMesh: MeshInstance3D;
@@ -23,6 +23,7 @@ var gravity = ProjectSettings.get_setting("physics/3d/default_gravity");
 @export var ground_accel: float = 14.0
 @export var ground_decel: float = 10.0;
 @export var ground_friction: float = 6.0;
+@export var water_swim_up: float = 6.0;
 
 @export_category("Air")
 @export var air_cap: float = 1;
@@ -38,6 +39,8 @@ var gravity = ProjectSettings.get_setting("physics/3d/default_gravity");
 @export_category("Camera related")
 @export var CameraSmoothingModule: CPlayerCameraSmoothing;
 @export var MoveableHeadModule: Node3D;
+
+
 
 const CROUCH_TRANSLATE: float = 0.7;
 const CROUCH_JUMP_ADD: float = CROUCH_TRANSLATE * 0.9;
@@ -58,21 +61,21 @@ func _main_movement_process(delta: float) -> void:
 		_last_frame_was_onfloor = Engine.get_physics_frames()
 	var input_dir = Input.get_vector("left", "right", "forward", "backwards").normalized();
 	wish_dir = Controller_Instance.global_transform.basis * Vector3(input_dir.x ,0, input_dir.y);
-	cam_aligned_wish_dir = NeckPivot.global_transform.basis * Vector3(input_dir.x ,0, input_dir.y);
+	cam_aligned_wish_dir = PlayerCamera.global_transform.basis * Vector3(input_dir.x ,0, input_dir.y);
 	
 	_handle_crouch(delta);
 	if not handle_noclip(delta):
-		if Controller_Instance.is_on_floor() or _snapped_to_stairs_last_frame:
-			if Input.is_action_just_pressed("jump") or (AUTO_BHOP and Input.is_action_pressed("jump")):
-				Controller_Instance.velocity.y = jump_velocity;
-			_handle_ground_physics(delta);
-		else:
-			_handle_air_physics(delta);
-			
+		if not _handle_water_physics(delta):
+			if Controller_Instance.is_on_floor() or _snapped_to_stairs_last_frame:
+				if Input.is_action_just_pressed("jump") or (AUTO_BHOP and Input.is_action_pressed("jump")):
+					Controller_Instance.velocity.y = jump_velocity;
+				_handle_ground_physics(delta);
+			else:
+				_handle_air_physics(delta);
+				
 		if not _snap_up_to_stairs_check(delta):
 			Controller_Instance.move_and_slide()
 			_snap_down_to_stairs_check()
-		
 	CameraSmoothingModule._slide_camera_smooth_back_to_origin(delta, walk_speed);
 	
 func _handle_air_physics(delta) -> void:
@@ -124,10 +127,25 @@ func _clip_velocity(normal: Vector3, overbounce: float, delta: float):
 	var adjust := Controller_Instance.velocity.dot(normal);
 	if adjust >= 0.0:
 		Controller_Instance.velocity -= normal * adjust;
-	
-func _handle_water_physics(delta) -> void:
-	pass
 
+# TODO refactor this (maybe use signals) so it works by not checking every frame if the playerinstance is overlapping water or something
+func _handle_water_physics(delta) -> bool:
+	if get_tree().get_nodes_in_group("water_area").all(func(area): return !area.overlaps_body(Controller_Instance)):
+		return false
+	
+	if not Controller_Instance.is_on_floor():
+		Controller_Instance.velocity.y -= gravity * 0.1 * delta;	
+	Controller_Instance.velocity += cam_aligned_wish_dir * _get_move_speed() * delta;
+	
+	if Input.is_action_pressed("jump"):
+		Controller_Instance.velocity.y += water_swim_up * delta;
+		
+	if Input.is_action_pressed("crouch"):
+		Controller_Instance.velocity.y -= water_swim_up * delta;
+		
+	Controller_Instance.velocity = Controller_Instance.velocity.lerp(Vector3.ZERO, 1.5 * delta);
+	
+	return true
 func _snap_down_to_stairs_check() -> void:
 	var did_snap: bool = false;
 	StairsBelowRayCast3D.force_raycast_update();
