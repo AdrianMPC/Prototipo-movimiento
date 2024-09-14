@@ -11,62 +11,67 @@
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_5qp06"]
 
 [node name="playerController" type="CharacterBody3D" node_paths=PackedStringArray("MovementManager", "WorldModel")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -0.005)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.005)
 floor_max_angle = 0.139626
 script = ExtResource("1_856yl")
 MovementManager = NodePath("MovementManager")
 WorldModel = NodePath("WorldModel")
 
-[node name="MovementManager" type="Node3D" parent="." node_paths=PackedStringArray("Controller_Instance", "NeckPivot", "HeadBobEffectNode", "PlayerCollision", "StairsBelowRayCast3D", "StairsAheadRayCast3D", "CameraSmoothingModule")]
+[node name="MovementManager" type="Node3D" parent="." node_paths=PackedStringArray("Controller_Instance", "NeckPivot", "HeadBobEffectNode", "PlayerCollision", "PlayerMesh", "StairsBelowRayCast3D", "StairsAheadRayCast3D", "CameraSmoothingModule", "MoveableHeadModule")]
 script = ExtResource("2_24w6v")
 SURF = false
 Controller_Instance = NodePath("..")
-NeckPivot = NodePath("../HeadPivot")
-HeadBobEffectNode = NodePath("../HeadPivot/HeadBob")
+NeckPivot = NodePath("../HeadPivotOGPos")
+HeadBobEffectNode = NodePath("../HeadPivotOGPos/HeadBob")
 PlayerCollision = NodePath("../CollisionShape3D")
-jump_velocity = 5.0
+PlayerMesh = NodePath("../WorldModel/PlayerMesh")
+sprint_speed = 9.0
 StairsBelowRayCast3D = NodePath("../StairsBelowRC3D")
 StairsAheadRayCast3D = NodePath("../StairsAheadRC3D")
-CameraSmoothingModule = NodePath("../HeadPivot/CameraSmoothNode")
+CameraSmoothingModule = NodePath("../HeadPivotOGPos/HeadPivot/CameraSmoothNode")
+MoveableHeadModule = NodePath("../HeadPivotOGPos/HeadPivot")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 shape = SubResource("CapsuleShape3D_5qf8x")
 
 [node name="WorldModel" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="WorldModel"]
+[node name="PlayerMesh" type="MeshInstance3D" parent="WorldModel"]
 mesh = SubResource("CapsuleMesh_5qp06")
 
-[node name="HeadPivot" type="Node3D" parent="." node_paths=PackedStringArray("PlayerController", "NeckPivot", "PlayerCamera")]
-unique_name_in_owner = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.784212, 0)
+[node name="HeadPivotOGPos" type="Node3D" parent="." node_paths=PackedStringArray("PlayerController", "NeckPivot", "PlayerCamera")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.784, 0)
 script = ExtResource("2_sm75g")
 PlayerController = NodePath("..")
 NeckPivot = NodePath(".")
-PlayerCamera = NodePath("CameraSmoothNode/Camera3D")
+PlayerCamera = NodePath("HeadPivot/CameraSmoothNode/Camera3D")
 
-[node name="HeadBob" type="Node3D" parent="HeadPivot" node_paths=PackedStringArray("HeadPivot", "Camera")]
+[node name="HeadBob" type="Node3D" parent="HeadPivotOGPos" node_paths=PackedStringArray("HeadPivot", "Camera")]
 unique_name_in_owner = true
 script = ExtResource("4_we0lm")
 HeadPivot = NodePath("..")
-Camera = NodePath("../CameraSmoothNode/Camera3D")
+Camera = NodePath("../HeadPivot/CameraSmoothNode/Camera3D")
 
-[node name="CameraSmoothNode" type="Node3D" parent="HeadPivot" node_paths=PackedStringArray("SmoothCamera", "ControllerInstance")]
+[node name="HeadPivot" type="Node3D" parent="HeadPivotOGPos"]
+unique_name_in_owner = true
+
+[node name="CameraSmoothNode" type="Node3D" parent="HeadPivotOGPos/HeadPivot" node_paths=PackedStringArray("SmoothCamera", "ControllerInstance")]
 unique_name_in_owner = true
 script = ExtResource("5_3c4ra")
 SmoothCamera = NodePath(".")
-ControllerInstance = NodePath("../..")
+ControllerInstance = NodePath("../../..")
 
-[node name="Camera3D" type="Camera3D" parent="HeadPivot/CameraSmoothNode"]
+[node name="Camera3D" type="Camera3D" parent="HeadPivotOGPos/HeadPivot/CameraSmoothNode"]
 unique_name_in_owner = true
 cull_mask = 1048573
 
 [node name="StairsAheadRC3D" type="RayCast3D" parent="."]
 unique_name_in_owner = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.119519, -0.478861, -0.712837)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.12, 0.479, -0.713)
 target_position = Vector3(0, -0.55, 0)
 
 [node name="StairsBelowRC3D" type="RayCast3D" parent="."]
 unique_name_in_owner = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
 target_position = Vector3(0, -0.75, 0)

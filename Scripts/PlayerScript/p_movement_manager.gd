@@ -13,11 +13,13 @@ var gravity = ProjectSettings.get_setting("physics/3d/default_gravity");
 @export var NeckPivot: Node3D;
 @export var HeadBobEffectNode: CHeadBobEffect;
 @export var PlayerCollision: CollisionShape3D;
+@export var PlayerMesh: MeshInstance3D;
 
 @export_category("Speed related")
 @export var jump_velocity: float = 4.0;
 @export var walk_speed: float = 7.0;
 @export var sprint_speed: float = 8.5;
+@export var CROUCH_SPEED_REDUCER: float = 0.7;
 @export var ground_accel: float = 14.0
 @export var ground_decel: float = 10.0;
 @export var ground_friction: float = 6.0;
@@ -35,13 +37,19 @@ var gravity = ProjectSettings.get_setting("physics/3d/default_gravity");
 
 @export_category("Camera related")
 @export var CameraSmoothingModule: CPlayerCameraSmoothing;
+@export var MoveableHeadModule: Node3D;
+
+const CROUCH_TRANSLATE: float = 0.7;
+const CROUCH_JUMP_ADD: float = CROUCH_TRANSLATE * 0.9;
+
+var is_crouch: bool = false;
+@onready var _original_capsule_height = PlayerCollision.shape.height;
 
 var _snapped_to_stairs_last_frame: bool = false;
 var _last_frame_was_onfloor: float = -INF;
 
 var wish_dir: Vector3 = Vector3.ZERO;
 var cam_aligned_wish_dir = Vector3.ZERO;
-
 
 var headbob_time: float = 0.0;
 
@@ -51,7 +59,8 @@ func _main_movement_process(delta: float) -> void:
 	var input_dir = Input.get_vector("left", "right", "forward", "backwards").normalized();
 	wish_dir = Controller_Instance.global_transform.basis * Vector3(input_dir.x ,0, input_dir.y);
 	cam_aligned_wish_dir = NeckPivot.global_transform.basis * Vector3(input_dir.x ,0, input_dir.y);
-
+	
+	_handle_crouch(delta);
 	if not handle_noclip(delta):
 		if Controller_Instance.is_on_floor() or _snapped_to_stairs_last_frame:
 			if Input.is_action_just_pressed("jump") or (AUTO_BHOP and Input.is_action_pressed("jump")):
@@ -65,10 +74,6 @@ func _main_movement_process(delta: float) -> void:
 			_snap_down_to_stairs_check()
 		
 	CameraSmoothingModule._slide_camera_smooth_back_to_origin(delta, walk_speed);
-
-func _send_bob_effect(delta) -> void:
-	headbob_time += delta * Controller_Instance.velocity.length();
-	HeadBobEffectNode.headbobProcess(headbob_time);
 	
 func _handle_air_physics(delta) -> void:
 	Controller_Instance.velocity.y -= gravity * delta
@@ -164,6 +169,34 @@ func _snap_up_to_stairs_check(delta: float) -> bool:
 			_snapped_to_stairs_last_frame = true;
 			return true;
 	return false;
+
+func _handle_crouch(delta: float) -> void:
+	var was_crouched_last_frame = is_crouch;
+	if Input.is_action_pressed("crouch"):
+		is_crouch = true;	
+	elif is_crouch and not Controller_Instance.test_move(Controller_Instance.global_transform, Vector3(0,CROUCH_TRANSLATE,0)):
+		is_crouch = false;
+#
+	var translate_y_if_possible := 0.0;
+	if was_crouched_last_frame != is_crouch and not Controller_Instance.is_on_floor() and not _snapped_to_stairs_last_frame:
+		translate_y_if_possible = CROUCH_JUMP_ADD if is_crouch else -CROUCH_JUMP_ADD;
+	
+	if translate_y_if_possible != 0.0:
+		var result = KinematicCollision3D.new();
+		Controller_Instance.test_move(Controller_Instance.global_transform, Vector3(0,translate_y_if_possible,0), result)
+		Controller_Instance.position.y += result.get_travel().y;
+		MoveableHeadModule.position.y -= result.get_travel().y;
+		MoveableHeadModule.position.y = clampf(MoveableHeadModule.position.y, -CROUCH_TRANSLATE, 0);
+	
+	MoveableHeadModule.position.y = move_toward(MoveableHeadModule.position.y, -CROUCH_TRANSLATE if is_crouch else 0.0, 7.0 * delta);
+	PlayerCollision.shape.height = _original_capsule_height - CROUCH_TRANSLATE if is_crouch else _original_capsule_height;
+	PlayerCollision.position.y = PlayerCollision.shape.height / 2;
+	
+	#For playermodel
+	PlayerMesh.mesh.height = PlayerCollision.shape.height;
+	PlayerMesh.position.y = PlayerCollision.position.y;
+	PlayerMesh.position.y = PlayerCollision.shape.height - 0.302;
+	PlayerMesh.position.y = PlayerCollision.shape.height - 0.9;
 	
 func handle_noclip(delta) -> bool:
 	var _speed = 2.0;
@@ -183,7 +216,13 @@ func handle_noclip(delta) -> bool:
 	Controller_Instance.global_position += Controller_Instance.velocity * delta;
 	return true
 
+func _send_bob_effect(delta) -> void:
+	headbob_time += delta * Controller_Instance.velocity.length();
+	HeadBobEffectNode.headbobProcess(headbob_time);
+
 func _get_move_speed() -> float:
+	if is_crouch:
+		return walk_speed * CROUCH_SPEED_REDUCER;
 	return sprint_speed if Input.is_action_pressed("sprint") else walk_speed;
 	
 func _is_surface_too_steep(normal: Vector3):
