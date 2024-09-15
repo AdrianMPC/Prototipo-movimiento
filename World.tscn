@@ -1,11 +1,13 @@
-[gd_scene load_steps=29 format=3 uid="uid://bqrr6v6dqg2w"]
+[gd_scene load_steps=37 format=3 uid="uid://bqrr6v6dqg2w"]
 
 [ext_resource type="Texture2D" uid="uid://dw5pnvt2mvaon" path="res://assets/hdris/kloofendal_48d_partly_cloudy_puresky_2k.hdr" id="1_2aun3"]
 [ext_resource type="PackedScene" uid="uid://inkieu5uwp0x" path="res://PlayerComponent.tscn" id="1_qaxgb"]
 [ext_resource type="Texture2D" uid="uid://d2mck8ctmpfnn" path="res://assets/textures/dev/grids/Dark/texture_07.png" id="2_vve4b"]
 [ext_resource type="Texture2D" uid="uid://dfcvpyi6o50cu" path="res://assets/textures/dev/grids/Orange/texture_05.png" id="4_25aek"]
-[ext_resource type="PackedScene" uid="uid://bak8ltrhbmlv5" path="res://assets/world/CSGStairMaker3D.tscn" id="5_swcr2"]
+[ext_resource type="PackedScene" uid="uid://bak8ltrhbmlv5" path="res://utils/CSGStairMaker3D.tscn" id="5_swcr2"]
 [ext_resource type="PackedScene" uid="uid://ca0wevg1lb4rx" path="res://utils/WaterMaker3D/WaterMaker3D.tscn" id="6_4l2c3"]
+[ext_resource type="Script" path="res://Scripts/World/interactable_component.gd" id="7_j3p0b"]
+[ext_resource type="Script" path="res://Scripts/World/spawn_once.gd" id="8_81nf0"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_50r4k"]
 panorama = ExtResource("1_2aun3")
@@ -96,6 +98,22 @@ uv1_scale = Vector3(0.06, 0.06, 0.06)
 uv1_triplanar = true
 uv1_world_triplanar = true
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sb4i1"]
+albedo_color = Color(0.177763, 0.0261103, 0.362412, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_myouy"]
+material = SubResource("StandardMaterial3D_sb4i1")
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_e4qbk"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pu1yx"]
+albedo_color = Color(1, 0, 0, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_6dlr1"]
+material = SubResource("StandardMaterial3D_pu1yx")
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_fwvdj"]
+
 [node name="Node3D" type="Node3D"]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
@@ -105,13 +123,14 @@ environment = SubResource("Environment_57f5r")
 transform = Transform3D(-0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, 0.75, -0.433013, 0, 0, 0)
 shadow_enabled = true
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+[node name="Move10" type="MeshInstance3D" parent="."]
 transform = Transform3D(2.16089, 0, 0, 0, 0.99777, 0, 0, 0, 2.16089, 0, 0, 0)
+layers = 3
 mesh = SubResource("PlaneMesh_b3arq")
 
-[node name="StaticBody3D" type="StaticBody3D" parent="MeshInstance3D"]
+[node name="StaticBody3D" type="StaticBody3D" parent="Move10"]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="MeshInstance3D/StaticBody3D"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Move10/StaticBody3D"]
 shape = SubResource("ConcavePolygonShape3D_hedwm")
 
 [node name="CharacterBody3D" parent="." instance=ExtResource("1_qaxgb")]
@@ -175,6 +194,10 @@ mesh = SubResource("BoxMesh_jfug0")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Block2/StaticBody3D"]
 shape = SubResource("ConvexPolygonShape3D_rd6cv")
+
+[node name="Label3D" type="Label3D" parent="Block2"]
+transform = Transform3D(-0.389629, 0, -8.74228e-08, 0, 1, 0, 3.40624e-08, 0, -1, -0.0238593, 0.3687, -0.501578)
+text = "button"
 
 [node name="Block3" type="MeshInstance3D" parent="."]
 transform = Transform3D(1.86639, 0, 0, 0, 0.49, 0, 0, 0, 1.205, -10.4665, 6.84223, 4.85236)
@@ -243,3 +266,57 @@ material = SubResource("StandardMaterial3D_3wmtn")
 water_texture_uv_scale = 0.06
 fog_color = Color(0.309804, 0.541176, 0.866667, 0.388235)
 fog_fade_dist = 1.0
+
+[node name="10Push" type="RigidBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.551105, -7.70751)
+collision_layer = 7
+collision_mask = 7
+mass = 10.0
+
+[node name="weight" type="Node3D" parent="10Push"]
+
+[node name="Cube" type="MeshInstance3D" parent="10Push/weight"]
+mesh = SubResource("BoxMesh_myouy")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="10Push"]
+shape = SubResource("BoxShape3D_e4qbk")
+
+[node name="Label3D" type="Label3D" parent="10Push"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.517741)
+text = "10KG"
+
+[node name="Boton" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 0.129204, 5.52688, 1.77598, 0.0351468)
+layers = 4
+mesh = SubResource("BoxMesh_6dlr1")
+
+[node name="CUsableComponent" type="Node" parent="Boton"]
+script = ExtResource("7_j3p0b")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Boton"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Boton/StaticBody3D"]
+shape = SubResource("BoxShape3D_fwvdj")
+
+[node name="10Push2" type="RigidBody3D" parent="."]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 7.8514, 6.39029, 1.3734)
+collision_layer = 3
+collision_mask = 3
+mass = 5.0
+script = ExtResource("8_81nf0")
+
+[node name="CUsableComponent" type="Node3D" parent="10Push2"]
+script = ExtResource("7_j3p0b")
+
+[node name="weight" type="Node3D" parent="10Push2"]
+
+[node name="Cube" type="MeshInstance3D" parent="10Push2/weight"]
+mesh = SubResource("BoxMesh_myouy")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="10Push2"]
+shape = SubResource("BoxShape3D_e4qbk")
+
+[node name="Label3D" type="Label3D" parent="10Push2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.517741)
+text = "5
+KG"

@@ -39,8 +39,7 @@ var gravity = ProjectSettings.get_setting("physics/3d/default_gravity");
 @export_category("Camera related")
 @export var CameraSmoothingModule: CPlayerCameraSmoothing;
 @export var MoveableHeadModule: Node3D;
-
-
+@export var ShapeCast: ShapeCast3D;
 
 const CROUCH_TRANSLATE: float = 0.7;
 const CROUCH_JUMP_ADD: float = CROUCH_TRANSLATE * 0.9;
@@ -74,6 +73,7 @@ func _main_movement_process(delta: float) -> void:
 				_handle_air_physics(delta);
 				
 		if not _snap_up_to_stairs_check(delta):
+			_push_away_rigid_bodies();
 			Controller_Instance.move_and_slide()
 			_snap_down_to_stairs_check()
 	CameraSmoothingModule._slide_camera_smooth_back_to_origin(delta, walk_speed);
@@ -114,7 +114,6 @@ func _handle_ground_physics(delta) -> void:
 	Controller_Instance.velocity *= new_speed;
 	#_send_bob_effect(delta);
 	
-	
 # Allow sliding
 func _clip_velocity(normal: Vector3, overbounce: float, delta: float):
 	var backoff := Controller_Instance.velocity.dot(normal) * overbounce;
@@ -133,8 +132,9 @@ func _handle_water_physics(delta) -> bool:
 	if get_tree().get_nodes_in_group("water_area").all(func(area): return !area.overlaps_body(Controller_Instance)):
 		return false
 	
-	if not Controller_Instance.is_on_floor():
-		Controller_Instance.velocity.y -= gravity * 0.1 * delta;	
+	if not Controller_Instance.is_on_floor() and not Input.is_action_pressed("jump"):
+		var fall_velocity_reductor = 0.6;
+		Controller_Instance.velocity.y -= gravity * fall_velocity_reductor * delta;	
 	Controller_Instance.velocity += cam_aligned_wish_dir * _get_move_speed() * delta;
 	
 	if Input.is_action_pressed("jump"):
@@ -143,7 +143,7 @@ func _handle_water_physics(delta) -> bool:
 	if Input.is_action_pressed("crouch"):
 		Controller_Instance.velocity.y -= water_swim_up * delta;
 		
-	Controller_Instance.velocity = Controller_Instance.velocity.lerp(Vector3.ZERO, 1.5 * delta);
+	Controller_Instance.velocity = Controller_Instance.velocity.lerp(Vector3.ZERO, 1.8 * delta);
 	
 	return true
 func _snap_down_to_stairs_check() -> void:
@@ -233,6 +233,37 @@ func handle_noclip(delta) -> bool:
 	Controller_Instance.velocity = cam_aligned_wish_dir * speed;	#Vector3.ZERO if you dont want the gmod style noclip
 	Controller_Instance.global_position += Controller_Instance.velocity * delta;
 	return true
+	
+func _push_away_rigid_bodies():
+	for i in Controller_Instance.get_slide_collision_count():
+		var collision := Controller_Instance.get_slide_collision(i)
+		if collision.get_collider() is RigidBody3D:
+			var push_dir = -collision.get_normal()
+			var velocity_diff_in_push_dir = Controller_Instance.velocity.dot(push_dir) - collision.get_collider().linear_velocity.dot(push_dir)
+			# negativo si quieres atraer los objetos hacía ti
+			velocity_diff_in_push_dir = max(0., velocity_diff_in_push_dir)
+			const MY_APPROX_MASS_KG = 80.0 # peso del player
+			# controla la fuerza  de empuje
+			var mass_ratio = min(1., MY_APPROX_MASS_KG / collision.get_collider().mass)
+			if mass_ratio < 0.25:
+				continue
+			push_dir.y = 0
+			var push_force = mass_ratio * 5.0
+			collision.get_collider().apply_impulse(push_dir * velocity_diff_in_push_dir * push_force, collision.get_position() - collision.get_collider().global_position)
+
+func get_usable_component_at_shapecast() -> CUsableComponent:
+	for i in ShapeCast.get_collision_count():
+		if i > 0 and ShapeCast.get_collider(0) != Controller_Instance:
+			print("touched player")
+			return null
+		if ShapeCast.get_collider(i).get_node_or_null("CUsableComponent") is CUsableComponent:
+			print("found usable component")
+			return ShapeCast.get_collider(i).get_child("CUsableComponent")
+		else:
+			print("collider index -> ", i)
+			print("Found instead -> ", ShapeCast.get_collider(i))
+			print("making sure what we found: ", ShapeCast.get_collider(i).get_node_or_null("CUsableComponent"))
+	return null;
 
 func _send_bob_effect(delta) -> void:
 	headbob_time += delta * Controller_Instance.velocity.length();

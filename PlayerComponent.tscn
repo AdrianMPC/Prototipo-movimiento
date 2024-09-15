@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://inkieu5uwp0x"]
+[gd_scene load_steps=9 format=3 uid="uid://inkieu5uwp0x"]
 
 [ext_resource type="Script" path="res://PlayerInstanceGeneral.gd" id="1_856yl"]
 [ext_resource type="Script" path="res://Scripts/PlayerScript/p_movement_manager.gd" id="2_24w6v"]
@@ -10,14 +10,20 @@
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_5qp06"]
 
+[sub_resource type="SphereShape3D" id="SphereShape3D_bup02"]
+radius = 0.4
+
 [node name="playerController" type="CharacterBody3D" node_paths=PackedStringArray("MovementManager", "WorldModel")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.005)
 floor_max_angle = 0.139626
+platform_on_leave = 2
+platform_floor_layers = 4294967041
+platform_wall_layers = 1
 script = ExtResource("1_856yl")
 MovementManager = NodePath("MovementManager")
 WorldModel = NodePath("WorldModel")
 
-[node name="MovementManager" type="Node3D" parent="." node_paths=PackedStringArray("Controller_Instance", "PlayerCamera", "HeadBobEffectNode", "PlayerCollision", "PlayerMesh", "StairsBelowRayCast3D", "StairsAheadRayCast3D", "CameraSmoothingModule", "MoveableHeadModule")]
+[node name="MovementManager" type="Node3D" parent="." node_paths=PackedStringArray("Controller_Instance", "PlayerCamera", "HeadBobEffectNode", "PlayerCollision", "PlayerMesh", "StairsBelowRayCast3D", "StairsAheadRayCast3D", "CameraSmoothingModule", "MoveableHeadModule", "ShapeCast")]
 script = ExtResource("2_24w6v")
 SURF = false
 Controller_Instance = NodePath("..")
@@ -31,6 +37,7 @@ StairsBelowRayCast3D = NodePath("../StairsBelowRC3D")
 StairsAheadRayCast3D = NodePath("../StairsAheadRC3D")
 CameraSmoothingModule = NodePath("../HeadPivotOGPos/HeadPivot/CameraSmoothNode")
 MoveableHeadModule = NodePath("../HeadPivotOGPos/HeadPivot")
+ShapeCast = NodePath("../HeadPivotOGPos/HeadPivot/CameraSmoothNode/Camera3D/UseShapeCast")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
@@ -68,9 +75,16 @@ ControllerInstance = NodePath("../../..")
 unique_name_in_owner = true
 cull_mask = 1048573
 
+[node name="UseShapeCast" type="ShapeCast3D" parent="HeadPivotOGPos/HeadPivot/CameraSmoothNode/Camera3D"]
+shape = SubResource("SphereShape3D_bup02")
+target_position = Vector3(0, 0, -2)
+max_results = 2
+collide_with_areas = true
+debug_shape_custom_color = Color(1, 0, 0, 1)
+
 [node name="StairsAheadRC3D" type="RayCast3D" parent="."]
 unique_name_in_owner = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.12, 0.479, -0.713)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.479, -0.713)
 target_position = Vector3(0, -0.55, 0)
 
 [node name="StairsBelowRC3D" type="RayCast3D" parent="."]
