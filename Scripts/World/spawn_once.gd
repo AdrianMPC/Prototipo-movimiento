@@ -11,10 +11,7 @@ func _enable_cube() -> void:
 	self.process_mode = Node.PROCESS_MODE_INHERIT;
 	self.show();
 
-func _process(delta: float) -> void:
-	pass
-
 
 func _on_c_usable_component_used() -> void:
-	print("Used");
+	print("Used by them");
 	_enable_cube();

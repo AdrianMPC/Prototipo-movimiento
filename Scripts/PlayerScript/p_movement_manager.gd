@@ -41,6 +41,9 @@ var gravity = ProjectSettings.get_setting("physics/3d/default_gravity");
 @export var MoveableHeadModule: Node3D;
 @export var ShapeCast: ShapeCast3D;
 
+@export_category("Ladder")
+@export var climb_speed: float = 5.0;
+
 const CROUCH_TRANSLATE: float = 0.7;
 const CROUCH_JUMP_ADD: float = CROUCH_TRANSLATE * 0.9;
 
@@ -55,6 +58,8 @@ var cam_aligned_wish_dir = Vector3.ZERO;
 
 var headbob_time: float = 0.0;
 
+var _cur_ladder_climbing: Area3D = null;
+
 func _main_movement_process(delta: float) -> void:
 	if Controller_Instance.is_on_floor(): 
 		_last_frame_was_onfloor = Engine.get_physics_frames()
@@ -63,7 +68,7 @@ func _main_movement_process(delta: float) -> void:
 	cam_aligned_wish_dir = PlayerCamera.global_transform.basis * Vector3(input_dir.x ,0, input_dir.y);
 	
 	_handle_crouch(delta);
-	if not handle_noclip(delta):
+	if not handle_noclip(delta) and not _handle_ladder():
 		if not _handle_water_physics(delta):
 			if Controller_Instance.is_on_floor() or _snapped_to_stairs_last_frame:
 				if Input.is_action_just_pressed("jump") or (AUTO_BHOP and Input.is_action_pressed("jump")):
@@ -115,7 +120,7 @@ func _handle_ground_physics(delta) -> void:
 	#_send_bob_effect(delta);
 	
 # Allow sliding
-func _clip_velocity(normal: Vector3, overbounce: float, delta: float):
+func _clip_velocity(normal: Vector3, overbounce: float, _delta: float):
 	var backoff := Controller_Instance.velocity.dot(normal) * overbounce;
 	if backoff >= 0:
 		return
@@ -215,6 +220,60 @@ func _handle_crouch(delta: float) -> void:
 	PlayerMesh.position.y = PlayerCollision.position.y;
 	PlayerMesh.position.y = PlayerCollision.shape.height - 0.302;
 	PlayerMesh.position.y = PlayerCollision.shape.height - 0.9;
+
+func _handle_ladder() -> bool:
+	var was_climbing_ladder := _cur_ladder_climbing and _cur_ladder_climbing.overlaps_body(Controller_Instance)
+	if not was_climbing_ladder:
+		_cur_ladder_climbing = null
+		for ladder in get_tree().get_nodes_in_group("ladder_area3d"):
+			if ladder.overlaps_body(Controller_Instance):
+				_cur_ladder_climbing = ladder
+				break
+	if _cur_ladder_climbing == null:
+		return false
+
+	var ladder_gtransform : Transform3D = _cur_ladder_climbing.global_transform
+	var pos_rel_to_ladder := ladder_gtransform.affine_inverse() * Controller_Instance.global_position
+	
+	var forward_move := Input.get_action_strength("forward") - Input.get_action_strength("backwards")
+	var side_move := Input.get_action_strength("right") - Input.get_action_strength("left")
+	var ladder_forward_move = ladder_gtransform.affine_inverse().basis * PlayerCamera.global_transform.basis * Vector3(0, 0, -forward_move)
+	var ladder_side_move = ladder_gtransform.affine_inverse().basis * PlayerCamera.global_transform.basis * Vector3(side_move, 0, 0)
+	
+	var ladder_strafe_vel : float = climb_speed * (ladder_side_move.x + ladder_forward_move.x)
+	var ladder_climb_vel : float = climb_speed * -ladder_side_move.z
+	var up_wish := Vector3.UP.rotated(Vector3(1,0,0), deg_to_rad(-45)).dot(ladder_forward_move)
+	ladder_climb_vel += climb_speed * up_wish
+
+	var should_dismount = false
+	if not was_climbing_ladder:
+		var mounting_from_top = pos_rel_to_ladder.y > _cur_ladder_climbing.get_node("TopOfLadder").position.y
+		if mounting_from_top:
+			if ladder_climb_vel > 0: should_dismount = true
+		else:
+			if (ladder_gtransform.affine_inverse().basis * wish_dir).z >= 0: should_dismount = true
+		if abs(pos_rel_to_ladder.z) > 0.1: should_dismount = true
+	
+	if Controller_Instance.is_on_floor() and ladder_climb_vel <= 0: should_dismount = true
+	
+	if should_dismount:
+		_cur_ladder_climbing = null
+		return false
+	
+	if was_climbing_ladder and Input.is_action_just_pressed("jump"):
+		Controller_Instance.velocity = _cur_ladder_climbing.global_transform.basis.z * jump_velocity * 1.5
+		_cur_ladder_climbing = null
+		return false
+	
+	Controller_Instance.velocity = ladder_gtransform.basis * Vector3(ladder_strafe_vel, ladder_climb_vel, 0)
+	# Should we allow ladder boosting? - comment if no
+	Controller_Instance.velocity = Controller_Instance.velocity.limit_length(climb_speed) 
+
+	pos_rel_to_ladder.z = 0
+	Controller_Instance.global_position = ladder_gtransform * pos_rel_to_ladder
+	
+	Controller_Instance.move_and_slide()
+	return true
 	
 func handle_noclip(delta) -> bool:
 	var _speed = 2.0;
@@ -254,15 +313,9 @@ func _push_away_rigid_bodies():
 func get_usable_component_at_shapecast() -> CUsableComponent:
 	for i in ShapeCast.get_collision_count():
 		if i > 0 and ShapeCast.get_collider(0) != Controller_Instance:
-			print("touched player")
 			return null
 		if ShapeCast.get_collider(i).get_node_or_null("CUsableComponent") is CUsableComponent:
-			print("found usable component")
-			return ShapeCast.get_collider(i).get_child("CUsableComponent")
-		else:
-			print("collider index -> ", i)
-			print("Found instead -> ", ShapeCast.get_collider(i))
-			print("making sure what we found: ", ShapeCast.get_collider(i).get_node_or_null("CUsableComponent"))
+			return ShapeCast.get_collider(i).get_node_or_null("CUsableComponent");
 	return null;
 
 func _send_bob_effect(delta) -> void:

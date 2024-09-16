@@ -6,7 +6,6 @@ signal used()
 signal used_by_character(character : CharacterBody3D)
 
 func used_with(character : CharacterBody3D):
-	print("Used");
 	used.emit()
 	used_by_character.emit(character)
 

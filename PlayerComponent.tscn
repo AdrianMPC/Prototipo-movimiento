@@ -25,7 +25,7 @@ WorldModel = NodePath("WorldModel")
 
 [node name="MovementManager" type="Node3D" parent="." node_paths=PackedStringArray("Controller_Instance", "PlayerCamera", "HeadBobEffectNode", "PlayerCollision", "PlayerMesh", "StairsBelowRayCast3D", "StairsAheadRayCast3D", "CameraSmoothingModule", "MoveableHeadModule", "ShapeCast")]
 script = ExtResource("2_24w6v")
-SURF = false
+AUTO_BHOP = true
 Controller_Instance = NodePath("..")
 PlayerCamera = NodePath("../HeadPivotOGPos/HeadPivot/CameraSmoothNode/Camera3D")
 HeadBobEffectNode = NodePath("../HeadPivotOGPos/HeadBob")
@@ -79,7 +79,7 @@ cull_mask = 1048573
 shape = SubResource("SphereShape3D_bup02")
 target_position = Vector3(0, 0, -2)
 max_results = 2
-collide_with_areas = true
+collision_mask = 65535
 debug_shape_custom_color = Color(1, 0, 0, 1)
 
 [node name="StairsAheadRC3D" type="RayCast3D" parent="."]

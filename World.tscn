@@ -1,4 +1,4 @@
-[gd_scene load_steps=37 format=3 uid="uid://bqrr6v6dqg2w"]
+[gd_scene load_steps=38 format=3 uid="uid://bqrr6v6dqg2w"]
 
 [ext_resource type="Texture2D" uid="uid://dw5pnvt2mvaon" path="res://assets/hdris/kloofendal_48d_partly_cloudy_puresky_2k.hdr" id="1_2aun3"]
 [ext_resource type="PackedScene" uid="uid://inkieu5uwp0x" path="res://PlayerComponent.tscn" id="1_qaxgb"]
@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://ca0wevg1lb4rx" path="res://utils/WaterMaker3D/WaterMaker3D.tscn" id="6_4l2c3"]
 [ext_resource type="Script" path="res://Scripts/World/interactable_component.gd" id="7_j3p0b"]
 [ext_resource type="Script" path="res://Scripts/World/spawn_once.gd" id="8_81nf0"]
+[ext_resource type="PackedScene" path="res://utils/ladder.tscn" id="9_6fr0f"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_50r4k"]
 panorama = ExtResource("1_2aun3")
@@ -286,17 +287,17 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.517741)
 text = "10KG"
 
 [node name="Boton" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 0.129204, 5.52688, 1.77598, 0.0351468)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 0.886481, 5.52688, 1.77598, -0.314832)
 layers = 4
 mesh = SubResource("BoxMesh_6dlr1")
-
-[node name="CUsableComponent" type="Node" parent="Boton"]
-script = ExtResource("7_j3p0b")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Boton"]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Boton/StaticBody3D"]
 shape = SubResource("BoxShape3D_fwvdj")
+
+[node name="CUsableComponent" type="Node" parent="Boton/StaticBody3D"]
+script = ExtResource("7_j3p0b")
 
 [node name="10Push2" type="RigidBody3D" parent="."]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 7.8514, 6.39029, 1.3734)
@@ -304,9 +305,6 @@ collision_layer = 3
 collision_mask = 3
 mass = 5.0
 script = ExtResource("8_81nf0")
-
-[node name="CUsableComponent" type="Node3D" parent="10Push2"]
-script = ExtResource("7_j3p0b")
 
 [node name="weight" type="Node3D" parent="10Push2"]
 
@@ -320,3 +318,32 @@ shape = SubResource("BoxShape3D_e4qbk")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.517741)
 text = "5
 KG"
+
+[node name="Ladder" parent="." instance=ExtResource("9_6fr0f")]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -6.45807, -1.49779, -3.49567)
+
+[node name="Ladder2" parent="." instance=ExtResource("9_6fr0f")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.45807, 7.31353, -14.4636)
+
+[node name="Block5" type="MeshInstance3D" parent="."]
+transform = Transform3D(22.0934, 0, 0, 0, 2.99967, 0, 0, 0, 4.64253, -15.9327, 13.302, -16.8386)
+mesh = SubResource("BoxMesh_jfug0")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Block5"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Block5/StaticBody3D"]
+shape = SubResource("ConvexPolygonShape3D_rd6cv")
+
+[node name="Ladder3" parent="." instance=ExtResource("9_6fr0f")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.388, 22.2875, -19.0625)
+
+[node name="Block6" type="MeshInstance3D" parent="."]
+transform = Transform3D(4.13767, 0, 0, 0, 2.99967, 0, 0, 0, 2.86516, -20.0431, 28.1661, -20.5319)
+mesh = SubResource("BoxMesh_jfug0")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Block6"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Block6/StaticBody3D"]
+shape = SubResource("ConvexPolygonShape3D_rd6cv")
+
+[connection signal="used" from="Boton/StaticBody3D/CUsableComponent" to="10Push2" method="_on_c_usable_component_used"]
