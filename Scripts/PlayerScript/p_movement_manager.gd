@@ -266,8 +266,8 @@ func _handle_ladder() -> bool:
 		return false
 	
 	Controller_Instance.velocity = ladder_gtransform.basis * Vector3(ladder_strafe_vel, ladder_climb_vel, 0)
-	# Should we allow ladder boosting? - comment if no
-	Controller_Instance.velocity = Controller_Instance.velocity.limit_length(climb_speed) 
+	# Should we allow ladder boosting? - uncomment if no
+	#Controller_Instance.velocity = Controller_Instance.velocity.limit_length(climb_speed) 
 
 	pos_rel_to_ladder.z = 0
 	Controller_Instance.global_position = ladder_gtransform * pos_rel_to_ladder
@@ -277,7 +277,7 @@ func _handle_ladder() -> bool:
 	
 func handle_noclip(delta) -> bool:
 	var _speed = 2.0;
-	if Input.is_action_just_pressed("noclip") and OS.has_feature("debug"):
+	if Input.is_action_just_pressed("noclip"):
 		NOCLIP = !NOCLIP;
 		noclip_move_speed_mult = _speed;
 	PlayerCollision.disabled = NOCLIP;

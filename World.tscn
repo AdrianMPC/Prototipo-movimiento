@@ -1,4 +1,4 @@
-[gd_scene load_steps=40 format=3 uid="uid://bqrr6v6dqg2w"]
+[gd_scene load_steps=41 format=3 uid="uid://bqrr6v6dqg2w"]
 
 [ext_resource type="Texture2D" uid="uid://dw5pnvt2mvaon" path="res://assets/hdris/kloofendal_48d_partly_cloudy_puresky_2k.hdr" id="1_2aun3"]
 [ext_resource type="PackedScene" uid="uid://inkieu5uwp0x" path="res://PlayerComponent.tscn" id="1_qaxgb"]
@@ -125,6 +125,9 @@ point_count = 3
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5cwsh"]
 albedo_texture = ExtResource("4_25aek")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6181o"]
+albedo_texture = ExtResource("2_vve4b")
 
 [node name="Node3D" type="Node3D"]
 
@@ -383,5 +386,20 @@ path_u_distance = 1.0
 path_joined = false
 smooth_faces = true
 material = SubResource("StandardMaterial3D_5cwsh")
+
+[node name="CSGBox3D" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.5321, 2.00083, 11.7754)
+use_collision = true
+size = Vector3(7.94629, 0.974854, 4.69189)
+material = SubResource("StandardMaterial3D_6181o")
+
+[node name="Box4" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.27496, 0, 0, 0, 1.27496, 0, 0, 0, 1.27496, -15.2499, 0.634819, 9.06503)
+mesh = SubResource("BoxMesh_jaor7")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Box4"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Box4/StaticBody3D"]
+shape = SubResource("ConvexPolygonShape3D_kdh8j")
 
 [connection signal="used" from="Boton/StaticBody3D/CUsableComponent" to="10Push2" method="_on_c_usable_component_used"]

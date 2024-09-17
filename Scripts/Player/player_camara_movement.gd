@@ -10,7 +10,7 @@ extends Node
 @export var currentControllerSensivity: float = 0.05;
 
 @export_category("Clamp value")
-@export var minValue: float = deg_to_rad(-60);
+@export var minValue: float = deg_to_rad(-80);
 @export var maxValue: float = deg_to_rad(80);
 
 var cur_controller_look: Vector2 = Vector2()
